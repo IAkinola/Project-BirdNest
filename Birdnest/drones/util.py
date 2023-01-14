@@ -3,7 +3,7 @@ import xmltodict
 import json
 import time
 
-# Get Drone Info
+# Get NDZ Drone Info
 def droneInfo():
 
     # Getting xml data and turn to json 
@@ -12,7 +12,16 @@ def droneInfo():
 
     jsonData = xmltodict.parse(treatedXml.text)
     
-    results = jsonData["report"]["capture"]
-    print(results)
+    drones = jsonData["report"]["capture"]['drone']
+    ndzDrones = {}
+    n = 1
+    
+    # Storing individual Drone info
+    for drone in drones:
+        if float(drone["positionY"]) <= 250000 and float(drone["positionX"]) <= 250000:
+            ndzDrones[f"Drone {n}"] = drone
+            n += 1 
+    print(ndzDrones)
 
 droneInfo()
+
