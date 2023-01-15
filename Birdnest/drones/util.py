@@ -8,19 +8,34 @@ def droneInfo():
 
     # Getting xml data and turn to json 
     infoUrl = "http://assignments.reaktor.com/birdnest/drones"
-    treatedXml = requests.get(infoUrl)
+    treatInfoXml = requests.get(infoUrl)
 
-    jsonData = xmltodict.parse(treatedXml.text)
+    infoDataJson = xmltodict.parse(treatInfoXml.text)
     
-    drones = jsonData["report"]["capture"]['drone']
+    drones = infoDataJson['report']['capture']['drone']
     ndzDrones = {}
-    n = 1
     
     # Storing individual Drone info
     for drone in drones:
-        if float(drone["positionY"]) <= 250000 and float(drone["positionX"]) <= 250000:
-            ndzDrones[f"Drone {n}"] = drone
-            n += 1 
+        if float(drone['positionY']) <= 250000 and float(drone['positionX']) <= 250000:
+            serialNumber = drone['serialNumber'] 
+            
+            # Store pilots' details
+            pilotUrl = f"http://assignments.reaktor.com/birdnest/pilots/{serialNumber}"
+            
+            getPilotJSON = requests.get(pilotUrl)
+            treatPilotJSON = getPilotJSON.content
+            content = json.loads(treatPilotJSON)         
+
+            if getPilotJSON.ok: # if response = 404 then return none
+                pilotName = content['firstName']
+                pilotLastName = content['lastName']
+                phoneNumber = content['phoneNumber']
+                email = content['email']
+                ndzDrones = {pilotName, pilotLastName, phoneNumber, email}
+            else:
+                return None
+            
     print(ndzDrones)
 
 droneInfo()
