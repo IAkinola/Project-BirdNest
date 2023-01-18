@@ -1,7 +1,19 @@
 import requests
 import xmltodict
 import json
+import sqlite3
 import time
+
+from models import PilotTable
+
+def addToDatabase(fName, lName, pNumber, email, cDistance):
+    conn = sqlite3.connect('db.sqlite3')
+    
+    cursor = conn.cursor()
+    cursor.execute('''INSERT INTO PilotTable VALUES(fName, lName, pNumber, email, cDistance)''')
+    conn.commit()
+    conn.close()
+
 
 # Get NDZ Drone Info
 def droneInfo():
@@ -13,11 +25,19 @@ def droneInfo():
     infoDataJson = xmltodict.parse(treatInfoXml.text)
     
     drones = infoDataJson['report']['capture']['drone']
-    ndzDrones = {}
     
     # Storing individual Drone info
     for drone in drones:
-        if float(drone['positionY']) <= 250000 and float(drone['positionX']) <= 250000:
+        positionY = float(drone['positionY'])
+        positionX = float(drone['positionX'])
+
+        if positionY > positionX:
+            closestDistance = 500000 - positionX
+        else:
+            closestDistance = 500000 - positionY
+        
+        
+        if positionY <= 350000 and positionX <= 350000:
             serialNumber = drone['serialNumber'] 
             
             # Store pilots' details
@@ -32,11 +52,9 @@ def droneInfo():
                 pilotLastName = content['lastName']
                 phoneNumber = content['phoneNumber']
                 email = content['email']
-                ndzDrones = {pilotName, pilotLastName, phoneNumber, email}
+
+                addToDatabase(pilotName, pilotLastName, phoneNumber, email, closestDistance)
             else:
                 return None
-            
-    print(ndzDrones)
 
-droneInfo()
 
