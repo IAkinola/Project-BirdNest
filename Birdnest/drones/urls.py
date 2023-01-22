@@ -1,6 +1,7 @@
-from django.urls import include, path
+from django.urls import path
 from . import views
+from drones.views import PilotListView
 
 urlpatterns = [
-    path('', views.index, name='index')
+    path("drones/", PilotListView.as_view())
 ]

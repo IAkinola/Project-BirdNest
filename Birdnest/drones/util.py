@@ -2,9 +2,9 @@ import requests
 import xmltodict
 import json
 import sqlite3
-import time
+import django_tables2 as tables
 
-from models import PilotTable
+from . import models
 
 def addToDatabase(fName, lName, pNumber, email, cDistance):
     conn = sqlite3.connect('db.sqlite3')
@@ -57,4 +57,8 @@ def droneInfo():
             else:
                 return None
 
+class PilotsTable(tables.Table):
+    class Meta:
+        model = models.PilotTable
+        template_name = "django_tables2/bootstrap.html"
 

@@ -1,5 +1,10 @@
 from django.shortcuts import render
 
-# Create your views here.
-def index(request):
-    return render(request, "drones/index.html")
+from django_tables2 import SingleTableView
+from . import models
+from .util import droneInfo, addToDatabase, PilotsTable
+
+class PilotListView(SingleTableView):
+    model = models.PilotTable
+    table_class = PilotsTable
+    template_name = 'drones/index.html'
