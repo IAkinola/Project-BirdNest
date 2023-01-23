@@ -6,13 +6,15 @@ import django_tables2 as tables
 
 from . import models
 
-def addToDatabase(fName, lName, pNumber, email, cDistance):
-    conn = sqlite3.connect('db.sqlite3')
+
+def addToDatabase(pilotDict):
+    con = sqlite3.connect('db.sqlite3')
     
-    cursor = conn.cursor()
-    cursor.execute('''INSERT INTO PilotTable VALUES(fName, lName, pNumber, email, cDistance)''')
-    conn.commit()
-    conn.close()
+    cursor = con.cursor()
+    cursor.execute("CREATE TABLE DronesTable(name, lastName, number, email)")
+    cursor.executemany("INSERT INTO PilotTable VALUES(:name, :lName, :number, :email)", [pilotDict])
+    con.commit()
+    con.close()
 
 
 # Get NDZ Drone Info
@@ -39,13 +41,18 @@ def droneInfo():
         
         if positionY <= 350000 and positionX <= 350000:
             serialNumber = drone['serialNumber'] 
-            
+            return serialNumber
+
+def getPilotInfo():
+            serialNumber = droneInfo()
             # Store pilots' details
             pilotUrl = f"http://assignments.reaktor.com/birdnest/pilots/{serialNumber}"
             
             getPilotJSON = requests.get(pilotUrl)
             treatPilotJSON = getPilotJSON.content
-            content = json.loads(treatPilotJSON)         
+            content = json.loads(treatPilotJSON)       
+
+            pilotData = ()  
 
             if getPilotJSON.ok: # if response = 404 then return none
                 pilotName = content['firstName']
@@ -53,7 +60,12 @@ def droneInfo():
                 phoneNumber = content['phoneNumber']
                 email = content['email']
 
-                addToDatabase(pilotName, pilotLastName, phoneNumber, email, closestDistance)
+                pilotData = (
+                    {"name": pilotName, "lName": pilotLastName, "number": phoneNumber, "email": email}
+                )
+
+                addToDatabase(pilotData)
+                return addToDatabase
             else:
                 return None
 

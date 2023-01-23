@@ -2,9 +2,13 @@ from django.shortcuts import render
 
 from django_tables2 import SingleTableView
 from . import models
-from .util import droneInfo, addToDatabase, PilotsTable
+from . import util
 
-class PilotListView(SingleTableView):
-    model = models.PilotTable
-    table_class = PilotsTable
-    template_name = 'drones/index.html'
+
+def pilotList(request):
+    table = util.PilotsTable(models.PilotTable.objects.all())
+    util.getPilotInfo()
+
+    return render(request, "drones/index.html", {
+        "table": table
+    })

@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
-from drones.views import PilotListView
+from drones.views import pilotList
 
 urlpatterns = [
-    path("drones/", PilotListView.as_view())
+    path("", views.pilotList)
 ]
