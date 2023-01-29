@@ -7,7 +7,6 @@ from . import util
 
 def pilotList(request):
     table = util.PilotsTable(models.PilotTable.objects.all())
-    util.getPilotInfo()
 
     return render(request, "drones/index.html", {
         "table": table

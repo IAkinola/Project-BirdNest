@@ -6,17 +6,6 @@ import django_tables2 as tables
 
 from . import models
 
-
-def addToDatabase(pilotDict):
-    con = sqlite3.connect('db.sqlite3')
-    
-    cursor = con.cursor()
-    cursor.execute("CREATE TABLE DronesTable(name, lastName, number, email)")
-    cursor.executemany("INSERT INTO PilotTable VALUES(:name, :lName, :number, :email)", [pilotDict])
-    con.commit()
-    con.close()
-
-
 # Get NDZ Drone Info
 def droneInfo():
 
@@ -41,7 +30,7 @@ def droneInfo():
         
         if positionY <= 350000 and positionX <= 350000:
             serialNumber = drone['serialNumber'] 
-            return serialNumber
+            return serialNumber #, closestDistance
 
 def getPilotInfo():
             serialNumber = droneInfo()
@@ -55,20 +44,19 @@ def getPilotInfo():
             pilotData = ()  
 
             if getPilotJSON.ok: # if response = 404 then return none
+                
                 pilotName = content['firstName']
                 pilotLastName = content['lastName']
                 phoneNumber = content['phoneNumber']
                 email = content['email']
 
-                pilotData = (
-                    {"name": pilotName, "lName": pilotLastName, "number": phoneNumber, "email": email}
-                )
-
-                addToDatabase(pilotData)
-                return addToDatabase
+                models.PilotTable.objects.all()
+                pilot = models.PilotTable(first_name = pilotName, last_name = pilotLastName, phone_number = phoneNumber, email = email, closest_distance = 0, ndz_time = 0)
+                pilot.save()
             else:
                 return None
 
+# Models for table
 class PilotsTable(tables.Table):
     class Meta:
         model = models.PilotTable
